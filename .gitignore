@@ -1,0 +1,17 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Node
+front/node_modules/
+front/dist/
+front/.env
+
+# Java/Gradle
+back/.gradle/
+back/build/
+back/out/
+back/target/
+*.log
