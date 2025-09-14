@@ -13,19 +13,17 @@ public class MailService {
   private final JavaMailSender mailSender;
 
   public void sendOtp(String to, String code) {
-    // 로그 찍기 (환경변수와 property 확인)
-    String userFromEnv = System.getenv("MAIL_USER");
-    String userFromProp = System.getProperty("MAIL_USER");
     log.info("sendOtp called -> to={}, code={}", to, code);
-    log.info("MAIL_USER (env) = {}", userFromEnv);
-    log.info("MAIL_USER (sysprop) = {}", userFromProp);
-
-    SimpleMailMessage msg = new SimpleMailMessage();
-    msg.setTo(to);
-    msg.setSubject("[Dongguk Mealmate] 이메일 인증 코드");
-    msg.setText("인증 코드: " + code + "\n\n10분 안에 입력하세요.");
-    mailSender.send(msg);
-
-    log.info("Mail sent successfully to {}", to);
+    try {
+      SimpleMailMessage msg = new SimpleMailMessage();
+      msg.setTo(to);
+      msg.setSubject("[Dongguk Mealmate] 이메일 인증 코드");
+      msg.setText("인증 코드: " + code + "\n\n10분 안에 입력하세요.");
+      mailSender.send(msg);
+      log.info("OTP mail sent to {}", to);
+    } catch (Exception e) {
+      log.error("Failed to send OTP mail to {}: {}", to, e.getMessage(), e);
+      throw e;
+    }
   }
 }

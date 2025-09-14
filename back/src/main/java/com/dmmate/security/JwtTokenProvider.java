@@ -4,44 +4,73 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import jakarta.annotation.PostConstruct;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-  private final Key key;
-  private final long accessValidityMs;
-  private final long refreshValidityMs;
 
-  public JwtTokenProvider(
-      @Value("${security.jwt.secret}") String secret,
-      @Value("${security.jwt.access-token-validity-seconds}") long accessSec,
-      @Value("${security.jwt.refresh-token-validity-seconds}") long refreshSec) {
-    this.key = Keys.hmacShaKeyFor(secret.getBytes());
-    this.accessValidityMs = accessSec * 1000L;
-    this.refreshValidityMs = refreshSec * 1000L;
+  @Value("${security.jwt.secret}")
+  private String secret;
+
+  @Value("${security.jwt.access-token-validity-seconds}")
+  private long accessValiditySec;
+
+  @Value("${security.jwt.refresh-token-validity-seconds}")
+  private long refreshValiditySec;
+
+  private Key key;
+
+  @PostConstruct
+  void init() {
+    // HS256 키 생성
+    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
   }
 
-  public String createAccessToken(Long userId, String email) {
-    return createToken(userId, email, accessValidityMs);
-  }
-
-  public String createRefreshToken(Long userId, String email) {
-    return createToken(userId, email, refreshValidityMs);
-  }
-
-  private String createToken(Long userId, String email, long validityMs) {
+  public String createAccessToken(String email) {
     long now = System.currentTimeMillis();
+    Date iat = new Date(now);
+    Date exp = new Date(now + accessValiditySec * 1000);
+
     return Jwts.builder()
-        .setSubject(String.valueOf(userId))
-        .claim("email", email)
-        .setIssuedAt(new Date(now))
-        .setExpiration(new Date(now + validityMs))
-        .signWith(key, SignatureAlgorithm.HS256)
+        .setSubject(email)
+        .setIssuedAt(iat)
+        .setExpiration(exp)
+        .signWith(SignatureAlgorithm.HS256, key) // 구버전 스타일
         .compact();
   }
 
-  public Key getKey() {
-    return key;
+  public String createRefreshToken(String email) {
+    long now = System.currentTimeMillis();
+    Date iat = new Date(now);
+    Date exp = new Date(now + refreshValiditySec * 1000);
+
+    return Jwts.builder()
+        .setSubject(email)
+        .setIssuedAt(iat)
+        .setExpiration(exp)
+        .signWith(SignatureAlgorithm.HS256, key)
+        .compact();
+  }
+
+  public boolean validate(String token) {
+    try {
+      // 구버전 파서 스타일 (경고 가능)
+      Jwts.parser().setSigningKey(key).parseClaimsJws(token);
+      return true;
+    } catch (JwtException | IllegalArgumentException e) {
+      return false;
+    }
+  }
+
+  public String getEmail(String token) {
+    Claims claims = Jwts.parser()
+        .setSigningKey(key)
+        .parseClaimsJws(token)
+        .getBody();
+    return claims.getSubject();
   }
 }

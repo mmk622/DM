@@ -39,14 +39,31 @@ export default function Login() {
   };
 
   const verify = async () => {
-    const { data } = await api.post("/api/auth/verify", { email, code, name });
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
+    try {
+      setLoading(true);
+      const { data } = await api.post("/api/auth/verify", { email, code, name });
+      console.log("[verify] response", data);
 
-    if (data.profileIncomplete) {
-      nav("/signup");
-    } else {
-      nav("/profile");
+      const at = data?.accessToken;
+      const rt = data?.refreshToken;
+      if (typeof at !== "string" || at.length < 20) {
+        alert("로그인 토큰을 받지 못했습니다. 서버 응답 키 이름을 확인하세요.");
+        return;
+      }
+
+      localStorage.setItem("accessToken", at);
+      if (typeof rt === "string") localStorage.setItem("refreshToken", rt);
+
+      if (data?.profileIncomplete) {
+        nav("/signup");
+      } else {
+        nav("/profile");
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert(e?.response?.data || "인증 실패");
+    } finally {
+      setLoading(false);
     }
   };
 
