@@ -25,7 +25,7 @@ export default function Login() {
     try {
       await api.post("/api/auth/otp", { email });
       setSent(true);
-      setTimer(180); // 3분
+      setTimer(300); // 5분
     } catch (e: any) {
       alert(e?.response?.data || "코드 요청 실패");
     } finally {
@@ -69,11 +69,11 @@ export default function Login() {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold">이메일 로그인</h1>
+      <h1 className="text-2xl font-bold">이메일 인증</h1>
 
       <input
         className="mt-4 border p-2 w-full"
-        placeholder="학교 이메일(@dgu.ac.kr)"
+        placeholder="학교 이메일(@dongguk.ac.kr)"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         disabled={sent && timer > 0} // 타이머 도는 동안 이메일 수정 잠금
@@ -126,10 +126,6 @@ export default function Login() {
           {/* 카운트다운 */}
           <p className="mt-2 text-sm text-gray-600">
             남은 시간: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, "0")}
-          </p>
-
-          <p className="mt-1 text-sm text-gray-500">
-            메일함은 <a className="underline" href="http://localhost:8025" target="_blank">Mailhog(8025)</a>에서 확인
           </p>
         </div>
       )}

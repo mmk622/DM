@@ -18,7 +18,7 @@ public class MailService {
       SimpleMailMessage msg = new SimpleMailMessage();
       msg.setTo(to);
       msg.setSubject("[Dongguk Mealmate] 이메일 인증 코드");
-      msg.setText("인증 코드: " + code + "\n\n10분 안에 입력하세요.");
+      msg.setText("인증 코드: " + code + "\n\n5분 안에 입력하세요.");
       mailSender.send(msg);
       log.info("OTP mail sent to {}", to);
     } catch (Exception e) {

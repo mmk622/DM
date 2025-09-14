@@ -17,7 +17,7 @@ public class OtpService {
 
   private static final String OTP_KEY = "otp:";
   private static final String VERIFIED_KEY = "otp:verified:";
-  private static final Duration OTP_TTL = Duration.ofMinutes(3);
+  private static final Duration OTP_TTL = Duration.ofMinutes(5);
   private static final Duration VERIFIED_TTL = Duration.ofMinutes(10);
   private final SecureRandom random = new SecureRandom();
 
