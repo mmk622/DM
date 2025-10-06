@@ -43,8 +43,8 @@ management:
         include: health,info
 security:
   jwt:
-    issuer: dm-app
-    secret-key: ${JWT_SECRET}
+    issuer: "dm-mate"
+    secret: ${JWT_SECRET}
     access-exp-min: 1440
 logging:
   level:

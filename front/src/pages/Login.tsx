@@ -1,68 +1,77 @@
 import React, { useState } from "react";
-import api from "../lib/api";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+
+const API = axios.create({
+  baseURL: "http://localhost:8080",
+});
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState(false);
   const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function send() {
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setBusy(true);
     try {
-      setBusy(true);
-      const { status } = await api.post("/api/auth/otp", { email });
-      if (status === 200) setSent(true);
-    } catch (e: any) {
-      alert(e?.response?.data ?? "OTP 요청 실패");
+      const res = await API.post("/api/auth/login", { email, password });
+      const token = res.data?.accessToken;
+      if (!token) throw new Error("토큰이 응답에 없습니다.");
+      localStorage.setItem("accessToken", token);
+      nav("/", { replace: true });
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        "로그인에 실패했습니다."
+      );
     } finally {
       setBusy(false);
     }
-  }
-
-  async function verify() {
-    try {
-      setBusy(true);
-      const { data, status } = await api.post("/api/auth/verify", { email, code });
-      if (status === 200 && data?.verified && data?.signupToken) {
-        localStorage.setItem("signupEmail", email);
-        localStorage.setItem("signupToken", data.signupToken);
-        nav("/complete-profile");
-      } else {
-        alert("인증에 실패했습니다.");
-      }
-    } catch (e: any) {
-      alert(e?.response?.data ?? "인증 실패");
-    } finally {
-      setBusy(false);
-    }
-  }
+  };
 
   return (
-    <div style={{ maxWidth: 360, margin: "40px auto" }}>
+    <div style={{ maxWidth: 420, margin: "64px auto" }}>
       <h1>로그인</h1>
-      <input
-        placeholder="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        style={{ display: "block", width: "100%", marginBottom: 8 }}
-        disabled={busy}
-      />
-      {!sent ? (
-        <button onClick={send} disabled={busy || !email.trim()}>인증 코드 받기</button>
-      ) : (
-        <>
+      <form onSubmit={onSubmit} style={{ display: "grid", gap: 12 }}>
+        <label>
+          이메일
           <input
-            placeholder="인증코드"
-            value={code}
-            onChange={e => setCode(e.target.value)}
-            style={{ display: "block", width: "100%", margin: "8px 0" }}
-            disabled={busy}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.currentTarget.value)}
+            required
+            placeholder="you@example.com"
           />
-          <button onClick={verify} disabled={busy || !code.trim()}>인증하기</button>
-        </>
+        </label>
+        <label>
+          비밀번호
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.currentTarget.value)}
+            required
+            placeholder="••••••••"
+          />
+        </label>
+        <button type="submit" disabled={busy}>
+          {busy ? "로그인 중..." : "로그인"}
+        </button>
+      </form>
+
+      {error && (
+        <p style={{ color: "crimson", marginTop: 12 }}>
+          {String(error)}
+        </p>
       )}
+
+      <div style={{ marginTop: 16 }}>
+        회원이 아니신가요? <Link to="/signup">회원가입</Link>
+      </div>
     </div>
   );
 }

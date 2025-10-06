@@ -1,10 +1,11 @@
 package com.dmmate.auth.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public record CompleteSignupRequest(
-    @NotBlank String signupToken,
-    @NotBlank String name,
-    @NotBlank String nickname,
-    @NotBlank String password
+        @NotBlank @Email String email,
+        @NotBlank String name,
+        @NotBlank String nickname,
+        @NotBlank String password
 ) {}
