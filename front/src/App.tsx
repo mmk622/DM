@@ -1,15 +1,18 @@
-import { useEffect, useState } from 'react';
-import api from './lib/api';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function App() {
-  const [msg, setMsg] = useState('');
-  useEffect(() => { api.get('/api/hello').then(r => setMsg(r.data.message)); }, []);
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="p-8 rounded-2xl shadow bg-white">
-        <h1 className="text-2xl font-bold">Dongguk Mealmate</h1>
-        <p className="mt-2 text-gray-600">Backend says: <b>{msg}</b></p>
-      </div>
-    </div>
-  );
+  const nav = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      nav("/profile", { replace: true });
+    } else {
+      nav("/login", { replace: true });
+    }
+  }, [nav]);
+
+  // 라우터 이동만 담당하므로 화면은 비움
+  return null;
 }
