@@ -4,6 +4,7 @@ import com.dmmate.auth.dto.AuthUserDto;
 import com.dmmate.user.User;
 import com.dmmate.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,15 +30,30 @@ public class AuthService {
     }
 
     /** 회원가입 완료(이름/닉네임/비번 설정) */
+    @Transactional
     public AuthUserDto completeSignup(String email, String name, String nickname, String rawPassword) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User not found for email: " + email));
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalStateException("email already exists");
+        }
 
-        user.setName(name);
-        user.setNickname(nickname);
-        user.setPasswordHash(passwordEncoder.encode(rawPassword));
-        user.setUpdatedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
 
+        User user = userRepository.findByEmail(email).orElseGet(() -> User.builder()
+                .email(email)
+                .name(name)
+                .nickname(nickname)
+                .passwordHash(passwordEncoder.encode(rawPassword))
+                .emailVerifiedAt(now)
+                .createdAt(now) // ✅ 반드시 채우기
+                .updatedAt(now) // ✅ 반드시 채우기
+                .build());
+
+        // 혹시 findByEmail(...)로 기존 스텁을 가져왔는데 createdAt이 비어 있으면 보정
+        if (user.getCreatedAt() == null)
+            user.setCreatedAt(now);
+        user.setUpdatedAt(now);
+
+        userRepository.save(user);
         return AuthUserDto.from(user);
     }
 

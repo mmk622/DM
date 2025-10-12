@@ -2,6 +2,8 @@ package com.dmmate.user;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,9 +15,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 320)
@@ -25,10 +30,10 @@ public class User {
     private String passwordHash; // nullable (이메일 인증만 끝난 상태일 수 있음)
 
     @Column
-    private String nickname;     // nullable
+    private String nickname; // nullable
 
     @Column
-    private String name;         // nullable
+    private String name; // nullable
 
     @Column(name = "email_verified_at")
     private LocalDateTime emailVerifiedAt; // nullable -> 인증되면 세팅

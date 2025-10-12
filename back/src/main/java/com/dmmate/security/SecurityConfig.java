@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 public class SecurityConfig {
@@ -30,11 +31,13 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // OTP/회원가입/로그인 공개
-                .requestMatchers("/api/auth/request-otp","/api/auth/verify-otp", "/api/users/signup","/api/users/login").permitAll()
+                .requestMatchers("/api/auth/request-otp","/api/auth/verify-otp", "/api/users/signup","api/auth/complete-signup", "/api/auth/login").permitAll()
+                .requestMatchers("/error").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // 프로필 조회 등 보호
                 .requestMatchers("/api/users/me").authenticated()
                 // 그 외 기본 거부
-                .anyRequest().denyAll()
+                .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((req, res, e) -> res.sendError(HttpServletResponse.SC_UNAUTHORIZED))
