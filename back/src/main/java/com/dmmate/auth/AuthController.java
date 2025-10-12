@@ -19,24 +19,25 @@ public class AuthController {
     private final JwtTokenProvider jwt;
 
     /** 1) OTP 발송 */
-    @PostMapping("/otp/send")
+    @PostMapping("/request-otp")
     public ResponseEntity<Map<String, Object>> sendOtp(@Valid @RequestBody OtpRequest req) {
         otpService.send(req.email());
         return ResponseEntity.ok(Map.of("ok", true));
     }
 
     /** 2) OTP 검증 -> 유저 조회/필요시 생성 */
-    @PostMapping("/otp/verify")
+    @PostMapping("/verify-otp")
     public ResponseEntity<AuthUserDto> verifyOtp(@Valid @RequestBody OtpVerifyRequest req) {
         boolean ok = otpService.verify(req.email(), req.code());
-        if (!ok) return ResponseEntity.status(401).build();
+        if (!ok)
+            return ResponseEntity.status(401).build();
 
         var userInfo = authService.afterVerifiedLookupOnly(req.email());
         return ResponseEntity.ok(userInfo);
     }
 
     /** 3) 회원가입 완료 */
-    @PostMapping("/signup/complete")
+    @PostMapping("/complete-signup")
     public ResponseEntity<AuthUserDto> completeSignup(@Valid @RequestBody CompleteSignupRequest req) {
         var dto = authService.completeSignup(req.email(), req.name(), req.nickname(), req.password());
         return ResponseEntity.ok(dto);

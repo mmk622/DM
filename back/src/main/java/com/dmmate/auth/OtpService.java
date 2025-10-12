@@ -8,12 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.dmmate.common.MailService;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OtpService {
 
     private final StringRedisTemplate redisTemplate;
+    private final MailService mailService;
     private static final SecureRandom RND = new SecureRandom();
 
     /** 클라이언트가 이메일만 주면 6자리 OTP 생성해서 5분간 저장 */
@@ -21,6 +24,7 @@ public class OtpService {
         String code = String.format("%06d", RND.nextInt(1_000_000));
         String key = key(email);
         redisTemplate.opsForValue().set(key, code, Duration.ofMinutes(5));
+        mailService.sendOtp(email, code);
         // TODO: 실제 이메일 전송로직 연동
         log.info("send OTP -> email={}, code={}", email, code);
     }

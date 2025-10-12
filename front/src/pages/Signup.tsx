@@ -64,9 +64,9 @@ export default function Signup() {
         setError(null);
         setBusy(true);
         try {
-            const res = await API.post<VerifyResponse>("/api/auth/verify", {
+            const res = await API.post<VerifyResponse>("/api/auth/verify-otp", {
                 email,
-                otp,
+                code: otp,
             });
 
             // 이미 가입이 끝난 계정이라면 accessToken을 줄 수도 있음

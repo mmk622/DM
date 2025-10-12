@@ -30,7 +30,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 // OTP/회원가입/로그인 공개
-                .requestMatchers("/api/auth/otp", "/api/auth/verify", "/api/auth/complete-signup", "/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/request-otp","/api/auth/verify-otp", "/api/users/signup","/api/users/login").permitAll()
                 // 프로필 조회 등 보호
                 .requestMatchers("/api/users/me").authenticated()
                 // 그 외 기본 거부
