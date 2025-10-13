@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -152,15 +152,20 @@ export default function Signup() {
                     <p style={{ color: "#666" }}>
                         {email} 주소로 전송된 인증코드를 입력하세요.
                     </p>
-                    <label>
-                        인증코드(OTP)
-                        <input
-                            type="text"
-                            required
-                            value={otp}
-                            onChange={(e) => setOtp(e.currentTarget.value)}
-                            placeholder="6자리 코드"
-                        />
+
+                    {/* 🔹 OTP 입력 + 타이머 */}
+                    <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ flexGrow: 1 }}>
+                            인증코드(OTP)
+                            <input
+                                type="text"
+                                required
+                                value={otp}
+                                onChange={(e) => setOtp(e.currentTarget.value)}
+                                placeholder="6자리 코드"
+                            />
+                        </div>
+                        <Timer key={email} />
                     </label>
                     <div style={{ display: "flex", gap: 8 }}>
                         <button type="button" onClick={() => setStep(1)} disabled={busy}>
@@ -172,6 +177,7 @@ export default function Signup() {
                     </div>
                 </form>
             )}
+
 
             {step === 3 && (
                 <form onSubmit={completeSignup} style={{ display: "grid", gap: 12 }}>
@@ -225,5 +231,33 @@ export default function Signup() {
                 이미 계정이 있으신가요? <Link to="/login">로그인</Link>
             </div>
         </div>
+    );
+}
+
+function Timer() {
+    const [seconds, setSeconds] = useState(300); // 5분 = 300초
+
+    useEffect(() => {
+        if (seconds <= 0) return;
+        const interval = setInterval(() => {
+            setSeconds((prev) => prev - 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [seconds]);
+
+    const minutes = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+
+    return (
+        <span
+            style={{
+                fontSize: "0.9rem",
+                color: seconds < 60 ? "red" : "#555",
+                minWidth: 60,
+                textAlign: "right",
+            }}
+        >
+            {minutes}:{sec.toString().padStart(2, "0")}
+        </span>
     );
 }
