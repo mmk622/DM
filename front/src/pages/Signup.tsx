@@ -138,7 +138,7 @@ export default function Signup() {
                             required
                             value={email}
                             onChange={(e) => setEmail(e.currentTarget.value)}
-                            placeholder="you@example.com"
+                            placeholder="학번@dongguk.ac.kr"
                         />
                     </label>
                     <button type="submit" disabled={busy}>
@@ -182,7 +182,7 @@ export default function Signup() {
                             required
                             value={name}
                             onChange={(e) => setName(e.currentTarget.value)}
-                            placeholder="홍길동"
+                            placeholder="김동국"
                         />
                     </label>
 
@@ -193,7 +193,7 @@ export default function Signup() {
                             required
                             value={nickname}
                             onChange={(e) => setNickname(e.currentTarget.value)}
-                            placeholder="길동이"
+                            placeholder="동국"
                         />
                     </label>
 

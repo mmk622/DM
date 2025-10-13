@@ -45,7 +45,7 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.currentTarget.value)}
             required
-            placeholder="you@example.com"
+            placeholder="학번@dongguk.ac.kr"
           />
         </label>
         <label>
