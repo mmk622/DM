@@ -34,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         // OTP/회원가입/로그인 공개
                         .requestMatchers("/api/auth/request-otp", "/api/auth/verify-otp", "/api/users/signup",
-                                "api/auth/complete-signup", "/api/auth/login")
+                                "api/auth/complete-signup", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
