@@ -20,6 +20,7 @@ export interface Comment {
   id: number;
   postId: number;
   authorId: number;
+  authorNickname: string;
   content: string;
   createdAt: string;
 }

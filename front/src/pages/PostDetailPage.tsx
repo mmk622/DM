@@ -127,7 +127,7 @@ export default function PostDetailPage() {
               >
                 <div className="whitespace-pre-wrap">
                   <div className="text-xs text-gray-500">
-                    작성자: {c.authorId}
+                    {c.authorNickname ?? c.authorId ?? "알 수 없음"} ·{c.createdAt}
                   </div>
                   <div>{c.content}</div>
                 </div>

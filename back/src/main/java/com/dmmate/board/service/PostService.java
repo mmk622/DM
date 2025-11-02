@@ -3,6 +3,8 @@ package com.dmmate.board.service;
 import com.dmmate.board.domain.*;
 import com.dmmate.board.dto.*;
 import com.dmmate.board.repo.*;
+import com.dmmate.user.UserRepository;
+import com.dmmate.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,7 @@ public class PostService {
 
   private final PostRepository postRepo;
   private final CommentRepository commentRepo;
+  private final UserRepository userRepo;
 
   public Page<PostListItem> search(String keyword, LocalDate date,
       GenderPref g, PartyPref p, Pageable pageable) {
@@ -35,7 +38,7 @@ public class PostService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
-  // 🔹 이메일 기반 authorId
+  // 이메일 기반 authorId
   public PostResponse create(String email, PostCreateRequest req) {
     Post post = new Post();
     post.setAuthorId(email); // ← String 이메일 그대로 저장
@@ -49,10 +52,15 @@ public class PostService {
 
   public Page<CommentResponse> listComments(Long postId, Pageable pageable) {
     return commentRepo.findByPostIdOrderByCreatedAtAsc(postId, pageable)
-        .map(CommentResponse::of);
+        .map(c -> {
+          String nickname = userRepo.findByEmail(c.getAuthorId())
+              .map(User::getNickname)
+              .orElse(null);
+          return CommentResponse.of(c, nickname); // ✅ 닉네임 포함
+        });
   }
 
-  // 🔹 이메일 기반 authorId
+  // 이메일 기반 authorId
   public CommentResponse addComment(String email, Long postId, CommentCreateRequest req) {
     postRepo.findById(postId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -60,7 +68,12 @@ public class PostService {
     c.setPostId(postId);
     c.setAuthorId(email); // ← String 이메일 그대로 저장
     c.setContent(req.content());
-    return CommentResponse.of(commentRepo.save(c));
+    Comment saved = commentRepo.save(c);
+
+    String nickname = userRepo.findByEmail(email)
+        .map(User::getNickname)
+        .orElse(null);
+    return CommentResponse.of(saved, nickname); // 닉네임 포함
   }
 
   // 🗑️ 게시글 삭제
