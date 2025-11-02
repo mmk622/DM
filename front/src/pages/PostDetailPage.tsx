@@ -106,6 +106,10 @@ export default function PostDetailPage() {
         </div>
       </div>
 
+      <div className="text-sm text-gray-700">
+        글쓴이 : {post.authorNickname ?? post.authorId ?? "알 수 없음"}
+      </div>
+
       <div className="text-sm text-gray-600">
         날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref}
       </div>

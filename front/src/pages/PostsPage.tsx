@@ -24,8 +24,7 @@ export default function PostsPage() {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <div className="flex justify-between items-center mb-3">
-        <h1 className="text-xl font-bold">게시글</h1>
-        <button className="px-3 py-2 rounded bg-indigo-600 text-white" onClick={() => nav("/posts/new")}>글쓰기</button>
+        <h1 className="text-xl font-bold"></h1>
       </div>
 
       <PostFilters initial={{}} onChange={(flt) => load({ ...flt, page: 0 })} />
@@ -44,6 +43,8 @@ export default function PostsPage() {
         ))}
         {!loading && page && page.content.length === 0 && <div className="p-4 text-gray-500">게시글이 없습니다.</div>}
       </div>
+
+      <button className="px-3 py-2 rounded bg-indigo-600 text-white" onClick={() => nav("/posts/new")}>글쓰기</button>
 
       <div className="flex gap-2 items-center justify-center mt-4">
         <button className="px-3 py-1 border rounded disabled:opacity-50" disabled={!page || page.first} onClick={() => load({ page: (page!.number - 1) })}>이전</button>

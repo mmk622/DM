@@ -34,7 +34,12 @@ public class PostService {
 
   public PostResponse get(Long id) {
     return postRepo.findById(id)
-        .map(PostResponse::of)
+        .map(p -> {
+          String nickname = userRepo.findByEmail(p.getAuthorId())
+              .map(User::getNickname)
+              .orElse(null);
+          return PostResponse.of(p, nickname); // ✅ 닉네임 포함
+        })
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
 
@@ -47,7 +52,13 @@ public class PostService {
     post.setMealDate(req.mealDate());
     post.setGenderPref(req.genderPref());
     post.setPartyPref(req.partyPref());
-    return PostResponse.of(postRepo.save(post));
+    Post saved = postRepo.save(post);
+
+    String nickname = userRepo.findByEmail(email)
+        .map(User::getNickname)
+        .orElse(null);
+
+    return PostResponse.of(saved, nickname);
   }
 
   public Page<CommentResponse> listComments(Long postId, Pageable pageable) {

@@ -4,6 +4,7 @@ export type PartyPref = 'ANY' | 'TWO' | 'THREE' | 'FOUR_PLUS';
 export interface PostListItem {
   id: number;
   authorId: number;
+  authorNickname: string;
   title: string;
   mealDate: string;     // yyyy-MM-dd
   genderPref: GenderPref;
