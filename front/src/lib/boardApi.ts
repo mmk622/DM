@@ -51,3 +51,13 @@ export async function getMe() {
   // MeResponse 예: { id: number, email: string, name?: string, nickname?: string ... }
   return api.get("/api/users/me").then(res => res.data);
 }
+
+// 🔹 공개 프로필 조회 (/api/users/{email})
+export async function getPublicUser(email: string) {
+  const res = await api.get(`/api/users/${encodeURIComponent(email)}`);
+  return res.data as {
+    email: string;
+    nickname: string | null;
+    name: string | null;
+  };
+}

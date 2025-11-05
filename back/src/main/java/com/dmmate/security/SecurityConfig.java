@@ -65,6 +65,12 @@ public class SecurityConfig {
                                 "/error")
                         .permitAll()
 
+                        // ✅ 공개 프로필 조회 허용
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*").permitAll()
+                        // 기존 /api/users/me 는 authenticated 로 유지
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me", "/api/users/me/")
+                        .authenticated()
+
                         // ✅ 게시판: GET은 공개, POST/DELETE는 인증
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()

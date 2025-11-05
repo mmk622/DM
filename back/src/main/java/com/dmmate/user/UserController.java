@@ -2,7 +2,10 @@
 package com.dmmate.user;
 
 import com.dmmate.user.dto.MeResponse;
+import com.dmmate.user.dto.PublicUserResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,5 +47,12 @@ public class UserController {
         String email = auth.getName(); // JwtAuthFilter 가 principal = email 로 세팅했다고 가정
         userRepo.findByEmail(email).ifPresent(userRepo::delete); // 존재하면 삭제
         return ResponseEntity.noContent().build(); // 204
+    }
+
+    @GetMapping("/{email}")
+    public PublicUserResponse getPublic(@PathVariable String email) {
+        return userRepo.findByEmail(email)
+                .map(PublicUserResponse::of)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + email));
     }
 }

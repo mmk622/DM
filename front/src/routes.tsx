@@ -9,6 +9,7 @@ import PostsPage from "./pages/PostsPage";
 import PostDetailPage from "./pages/PostDetailPage";
 import PostCreatePage from "./pages/PostCreatePage";
 import RequireAuth from "./components/RequireAuth";
+import UserProfile from "./pages/UserProfile";
 
 export const router = createBrowserRouter([
   {
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
       { path: "signup", element: <Signup /> },
       { path: "profile", element: <Profile /> },
       { path: "complete-profile", element: <CompleteProfile /> },
+      { path: "u/:email", element: <UserProfile /> }, // 공개 프로필
       { path: "posts", element: <PostsPage /> }, // 목록/검색
       { path: "posts/:id", element: <PostDetailPage /> }, // 상세
       {

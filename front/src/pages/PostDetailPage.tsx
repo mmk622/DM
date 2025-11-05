@@ -107,7 +107,13 @@ export default function PostDetailPage() {
       </div>
 
       <div className="text-sm text-gray-700">
-        글쓴이 : {post.authorNickname ?? post.authorId ?? "알 수 없음"}
+        글쓴이:
+        <button
+          className="underline underline-offset-2 hover:opacity-80"
+          onClick={() => post.authorId && nav(`/u/${encodeURIComponent(String(post.authorId))}`)}
+        >
+          {post.authorNickname ?? post.authorId ?? "알 수 없음"}
+        </button>
       </div>
 
       <div className="text-sm text-gray-600">
@@ -131,7 +137,13 @@ export default function PostDetailPage() {
               >
                 <div className="whitespace-pre-wrap">
                   <div className="text-xs text-gray-500">
-                    {c.authorNickname ?? c.authorId ?? "알 수 없음"} ·{c.createdAt}
+                    <button
+                      className="underline underline-offset-2 hover:opacity-80 mr-1"
+                      onClick={() => c.authorId && nav(`/u/${encodeURIComponent(String(c.authorId))}`)}
+                    >
+                      {c.authorNickname ?? c.authorId ?? "알 수 없음"}
+                    </button>
+                    · {c.createdAt}
                   </div>
                   <div>{c.content}</div>
                 </div>
