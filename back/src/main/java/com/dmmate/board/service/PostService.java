@@ -73,13 +73,41 @@ public class PostService {
     return PostResponse.of(saved, nickname, 0.0, 0L, null);
   }
 
-  public Page<CommentResponse> listComments(Long postId, Pageable pageable) {
+  public Page<CommentResponse> listComments(Long postId, String viewerEmail, Pageable pageable) {
+    Post post = postRepo.findById(postId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    String postAuthor = post.getAuthorId();
+
     return commentRepo.findByPostIdOrderByCreatedAtAsc(postId, pageable)
         .map(c -> {
+          boolean canView = !c.isSecret()
+              || (viewerEmail != null && (viewerEmail.equalsIgnoreCase(c.getAuthorId())
+                  || viewerEmail.equalsIgnoreCase(postAuthor)));
+
+          if (!canView) {
+            // 마스킹: 내용 숨김, 작성자 숨김(단, 글쓴이가 단 비밀댓글이면 '글쓴이')
+            String maskedName = c.getAuthorId().equalsIgnoreCase(postAuthor) ? "글쓴이" : null;
+            Comment masked = new Comment();
+            masked.setId(c.getId());
+            masked.setPostId(c.getPostId());
+            masked.setAuthorId(null); // 프로필 숨김
+            masked.setContent("비밀 댓글입니다."); // 내용 숨김
+            masked.setCreatedAt(c.getCreatedAt());
+            masked.setSecret(true);
+
+            return CommentResponse.of(masked, maskedName);
+          }
+
+          // 열람 가능한 경우: 글쓴이가 단 비밀댓글이면 표시명 교체
           String nickname = userRepo.findByEmail(c.getAuthorId())
               .map(User::getNickname)
               .orElse(null);
-          return CommentResponse.of(c, nickname); // ✅ 닉네임 포함
+
+          if (c.isSecret() && c.getAuthorId().equalsIgnoreCase(postAuthor)) {
+            nickname = "글쓴이";
+          }
+          return CommentResponse.of(c, nickname);
         });
   }
 
@@ -91,8 +119,13 @@ public class PostService {
     c.setPostId(postId);
     c.setAuthorId(email); // ← String 이메일 그대로 저장
     c.setContent(req.content());
+    c.setSecret(Boolean.TRUE.equals(req.secret()));
+
     Comment saved = commentRepo.save(c);
 
+    String postAuthor = postRepo.findById(postId)
+        .map(Post::getAuthorId)
+        .orElse(null);
     String nickname = userRepo.findByEmail(email)
         .map(User::getNickname)
         .orElse(null);

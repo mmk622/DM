@@ -35,7 +35,8 @@ public class BoardController {
 
   // 게시글 상세
   @GetMapping("/posts/{id}")
-  public PostResponse detail(@PathVariable Long id, @AuthenticationPrincipal String email) {
+  public PostResponse detail(@PathVariable Long id, @AuthenticationPrincipal String emailRaw) {
+    String email = ("anonymousUser".equals(emailRaw)) ? null : emailRaw;
     return service.getWithRating(id, email);
   }
 
@@ -50,8 +51,10 @@ public class BoardController {
 
   // 댓글 목록 (페이징)
   @GetMapping("/posts/{id}/comments")
-  public Page<CommentResponse> comments(@PathVariable Long id, Pageable pageable) {
-    return service.listComments(id, pageable);
+  public Page<CommentResponse> comments(@PathVariable Long id, @AuthenticationPrincipal String emailRaw,
+      Pageable pageable) {
+    String email = ("anonymousUser".equals(emailRaw)) ? null : emailRaw;
+    return service.listComments(id, email, pageable);
   }
 
   // 댓글 작성 (인증 필요)

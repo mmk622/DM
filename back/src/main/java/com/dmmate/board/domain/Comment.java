@@ -24,4 +24,7 @@ public class Comment {
 
   @Column(nullable = false)
   private LocalDateTime createdAt = LocalDateTime.now();
+
+  @Column(nullable = false)
+  private boolean secret = false;
 }

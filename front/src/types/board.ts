@@ -47,7 +47,10 @@ export interface PostCreateRequest {
   partyPref: PartyPref;
 }
 
-export interface CommentCreateRequest { content: string; }
+export interface CommentCreateRequest {
+  content: string;
+  secret?: boolean;
+}
 
 export interface RatingResponse {
   postId: number;

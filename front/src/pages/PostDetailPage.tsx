@@ -56,8 +56,8 @@ export default function PostDetailPage() {
   }, [postId]);
 
   const onChat = () => nav(`/chat/${post?.authorId}`); // 프로젝트 규칙
-  const onAddComment = async (content: string) => {
-    await addComment(postId, { content });
+  const onAddComment = async (content: string, secret: boolean) => {
+    await addComment(postId, { content, secret });
     await load();
   };
 
@@ -106,13 +106,6 @@ export default function PostDetailPage() {
               삭제
             </button>
           )}
-
-          <button
-            className="px-3 py-2 rounded bg-green-600 text-white"
-            onClick={onChat}
-          >
-            1:1 채팅
-          </button>
         </div>
       </div>
 
