@@ -1,6 +1,7 @@
-// UserController.java
 package com.dmmate.user;
 
+import com.dmmate.board.repo.PostRepository;
+import com.dmmate.board.repo.RatingRepository;
 import com.dmmate.user.dto.MeResponse;
 import com.dmmate.user.dto.PublicUserResponse;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,13 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserRepository userRepo;
+    private final PostRepository postRepo;
+    private final RatingRepository ratingRepo;
 
-    public UserController(UserRepository userRepo) {
+    public UserController(UserRepository userRepo, PostRepository postRepo, RatingRepository ratingRepo) {
         this.userRepo = userRepo;
+        this.postRepo = postRepo;
+        this.ratingRepo = ratingRepo;
     }
 
     // /api/users/me 는 SecurityConfig 에서 authenticated()로 보호중이라고 가정
@@ -34,10 +39,10 @@ public class UserController {
 
         return new MeResponse(
                 u.getEmail(),
-                u.getName(), // ✅ 엔티티에 getter 가 있어야 함
+                u.getName(), // 엔티티에 getter 가 있어야 함
                 u.getNickname(),
                 roles,
-                u.getCreatedAt(), // ✅ 엔티티에 getter 가 있어야 함 (LocalDateTime)
+                u.getCreatedAt(), // 엔티티에 getter 가 있어야 함 (LocalDateTime)
                 u.getUpdatedAt());
     }
 
@@ -49,10 +54,18 @@ public class UserController {
         return ResponseEntity.noContent().build(); // 204
     }
 
+    /** 공개 프로필 조회 (닉네임 + 평균 평점 + 게시글 수 포함) */
     @GetMapping("/{email}")
     public PublicUserResponse getPublic(@PathVariable String email) {
-        return userRepo.findByEmail(email)
-                .map(PublicUserResponse::of)
+        User u = userRepo.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + email));
+
+        // 사용자가 쓴 게시글 수
+        long postCount = postRepo.countByAuthorId(email);
+
+        // 해당 사용자의 모든 게시글에 대한 평균 평점
+        Double avgRating = ratingRepo.getAverageScoreForAuthor(email);
+
+        return PublicUserResponse.of(u, avgRating, postCount);
     }
 }
