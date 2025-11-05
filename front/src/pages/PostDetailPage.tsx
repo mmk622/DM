@@ -29,6 +29,8 @@ export default function PostDetailPage() {
     return String(post.authorId).toLowerCase() === String(meEmail).toLowerCase();
   }, [post, meEmail]);
 
+  const isMyComment = (c: Comment) => !!meEmail && String(c.authorId).toLowerCase() === String(meEmail).toLowerCase();
+
   const load = async () => {
     setLoading(true);
     const [me, p, c] = await Promise.all([

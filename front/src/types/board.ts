@@ -23,7 +23,7 @@ export interface Post extends PostListItem {
 export interface Comment {
   id: number;
   postId: number;
-  authorId: number;
+  authorId: string;
   authorNickname: string;
   content: string;
   createdAt: string;
