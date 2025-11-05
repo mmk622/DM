@@ -22,7 +22,7 @@ public class BoardController {
 
   private final PostService service;
 
-  // 📋 게시글 목록 + 검색 + 페이징
+  // 게시글 목록 + 검색 + 페이징
   @GetMapping("/posts")
   public Page<PostListItem> list(
       @RequestParam(required = false) String keyword,
@@ -33,38 +33,38 @@ public class BoardController {
     return service.search(keyword, date, genderPref, partyPref, pageable);
   }
 
-  // 📄 게시글 상세
+  // 게시글 상세
   @GetMapping("/posts/{id}")
-  public PostResponse detail(@PathVariable Long id) {
-    return service.get(id);
+  public PostResponse detail(@PathVariable Long id, @AuthenticationPrincipal String email) {
+    return service.getWithRating(id, email);
   }
 
-  // ✏️ 게시글 작성 (인증 필요)
+  // 게시글 작성 (인증 필요)
   @PostMapping("/posts")
   @ResponseStatus(HttpStatus.CREATED)
   public PostResponse create(
-      @AuthenticationPrincipal String email, // ✅ SpEL 제거 — 이메일 직접 주입
+      @AuthenticationPrincipal String email,
       @RequestBody @Valid PostCreateRequest req) {
     return service.create(email, req);
   }
 
-  // 💬 댓글 목록 (페이징)
+  // 댓글 목록 (페이징)
   @GetMapping("/posts/{id}/comments")
   public Page<CommentResponse> comments(@PathVariable Long id, Pageable pageable) {
     return service.listComments(id, pageable);
   }
 
-  // 💬 댓글 작성 (인증 필요)
+  // 댓글 작성 (인증 필요)
   @PostMapping("/posts/{id}/comments")
   @ResponseStatus(HttpStatus.CREATED)
   public CommentResponse addComment(
       @PathVariable Long id,
-      @AuthenticationPrincipal String email, // ✅ SpEL 제거 — 이메일 직접 주입
+      @AuthenticationPrincipal String email,
       @RequestBody @Valid CommentCreateRequest req) {
     return service.addComment(email, id, req);
   }
 
-  // 🗑️ 게시글 삭제
+  // 게시글 삭제
   @DeleteMapping("/posts/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deletePost(
@@ -73,7 +73,7 @@ public class BoardController {
     service.deletePost(email, id);
   }
 
-  // 🗑️ 댓글 삭제
+  // 댓글 삭제
   @DeleteMapping("/posts/{postId}/comments/{commentId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteComment(
@@ -81,5 +81,25 @@ public class BoardController {
       @PathVariable Long commentId,
       @AuthenticationPrincipal String email) {
     service.deleteComment(email, postId, commentId);
+  }
+
+  // 평점 등록
+  public record RatingRequest(Integer score) {
+  } // 0~10 (별 반개=1점)
+
+  @PostMapping("/posts/{id}/rating")
+  public RatingResponse rate(
+      @PathVariable Long id,
+      @AuthenticationPrincipal String email,
+      @RequestBody RatingRequest body) {
+    return service.rate(email, id, body.score());
+  }
+
+  // 내 평점 조회
+  @GetMapping("/posts/{id}/rating")
+  public RatingResponse myRating(
+      @PathVariable Long id,
+      @AuthenticationPrincipal String email) {
+    return service.myRating(email, id);
   }
 }

@@ -61,3 +61,8 @@ export async function getPublicUser(email: string) {
     name: string | null;
   };
 }
+
+export async function ratePost(postId: number, score: number) {
+  const { data } = await api.post(`/api/posts/${postId}/rating`, { score });
+  return data as { postId: number; myScore: number | null };
+}

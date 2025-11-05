@@ -7,6 +7,7 @@ import {
   deletePost as apiDeletePost,
   deleteComment as apiDeleteComment,
   getMe,
+  ratePost
 } from "../lib/boardApi";
 import { Post, Comment } from "../types/board";
 import CommentForm from "../components/CommentForm";
@@ -20,6 +21,7 @@ export default function PostDetailPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [meEmail, setMeEmail] = useState<string | null>(null);
+  const [myRating, setMyRating] = useState<number | null>(null);
 
   const isAuthor = useMemo(() => {
     if (!post || !meEmail) return false;
@@ -37,7 +39,15 @@ export default function PostDetailPage() {
     setMeEmail(me?.email || null);
     setPost(p);
     setComments(c.content);
+    setMyRating(p.myRating ?? null);
     setLoading(false);
+  };
+
+  // 평점 선택 핸들러
+  const onRate = async (v: number) => {
+    const score = Math.round(v * 2); // 0~5 → 0~10
+    await ratePost(postId, score);
+    await load();
   };
 
   useEffect(() => {
@@ -117,9 +127,31 @@ export default function PostDetailPage() {
       </div>
 
       <div className="text-sm text-gray-600">
-        날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref}
+        날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref} · 평점 ★ {(post.avgRating ?? 0) / 2} / 5 ({post.ratingsCount ?? 0}명)
       </div>
       <div className="p-4 border rounded whitespace-pre-wrap">{post.content}</div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-gray-600">내 평점</span>
+        <select
+          className="border rounded px-2 py-1"
+          value={myRating != null ? (myRating / 2).toString() : ""}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (!Number.isNaN(v)) onRate(v);
+          }}
+        >
+          <option value="">선택</option>
+          {Array.from({ length: 11 }).map((_, i) => {
+            const v = i * 0.5;
+            return (
+              <option key={v} value={v}>
+                {v} / 5
+              </option>
+            );
+          })}
+        </select>
+      </div>
 
       <div className="space-y-2">
         <h2 className="font-semibold">댓글</h2>

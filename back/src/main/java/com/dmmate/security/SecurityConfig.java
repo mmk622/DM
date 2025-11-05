@@ -72,6 +72,7 @@ public class SecurityConfig {
                         .authenticated()
 
                         // ✅ 게시판: GET은 공개, POST/DELETE는 인증
+                        .requestMatchers(HttpMethod.GET, "/api/posts/*/rating").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()

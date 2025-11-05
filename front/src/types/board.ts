@@ -10,6 +10,9 @@ export interface PostListItem {
   genderPref: GenderPref;
   partyPref: PartyPref;
   createdAt: string;    // ISO
+  avgRating: number;
+  ratingsCount: number;
+  myRating?: number | null;
 }
 
 export interface Post extends PostListItem {
@@ -45,3 +48,8 @@ export interface PostCreateRequest {
 }
 
 export interface CommentCreateRequest { content: string; }
+
+export interface RatingResponse {
+  postId: number;
+  myScore: number | null;
+}

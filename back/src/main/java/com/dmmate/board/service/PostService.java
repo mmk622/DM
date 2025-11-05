@@ -21,6 +21,7 @@ public class PostService {
 
   private final PostRepository postRepo;
   private final CommentRepository commentRepo;
+  private final RatingRepository ratingRepo;
   private final UserRepository userRepo;
 
   public Page<PostListItem> search(String keyword, LocalDate date,
@@ -32,15 +33,26 @@ public class PostService {
     return postRepo.findAll(spec, pageable).map(PostListItem::of);
   }
 
-  public PostResponse get(Long id) {
-    return postRepo.findById(id)
-        .map(p -> {
-          String nickname = userRepo.findByEmail(p.getAuthorId())
-              .map(User::getNickname)
-              .orElse(null);
-          return PostResponse.of(p, nickname); // ✅ 닉네임 포함
-        })
+  // 상세 + 평점 포함
+  public PostResponse getWithRating(Long id, String currentEmailOrNull) {
+    Post p = postRepo.findById(id)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    String nickname = userRepo.findByEmail(p.getAuthorId())
+        .map(User::getNickname)
+        .orElse(null);
+
+    Double avg = ratingRepo.getAverageScore(id);
+    Long cnt = ratingRepo.getCount(id);
+    Integer my = null;
+
+    if (currentEmailOrNull != null) {
+      my = ratingRepo.findByPostIdAndRaterEmail(id, currentEmailOrNull)
+          .map(Rating::getScore)
+          .orElse(null);
+    }
+
+    return PostResponse.of(p, nickname, avg, cnt, my);
   }
 
   // 이메일 기반 authorId
@@ -58,7 +70,7 @@ public class PostService {
         .map(User::getNickname)
         .orElse(null);
 
-    return PostResponse.of(saved, nickname);
+    return PostResponse.of(saved, nickname, 0.0, 0L, null);
   }
 
   public Page<CommentResponse> listComments(Long postId, Pageable pageable) {
@@ -98,6 +110,34 @@ public class PostService {
     }
 
     postRepo.delete(post);
+  }
+
+  // 평점 등록/수정
+  public RatingResponse rate(String email, Long postId, int score) {
+    if (score < 0 || score > 10)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "score must be 0..10");
+
+    postRepo.findById(postId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    Rating r = ratingRepo.findByPostIdAndRaterEmail(postId, email)
+        .orElseGet(() -> {
+          Rating nr = new Rating();
+          nr.setPostId(postId);
+          nr.setRaterEmail(email);
+          return nr;
+        });
+    r.setScore(score);
+    ratingRepo.save(r);
+    return new RatingResponse(postId, score);
+  }
+
+  // 내 평점 조회
+  public RatingResponse myRating(String email, Long postId) {
+    Integer my = ratingRepo.findByPostIdAndRaterEmail(postId, email)
+        .map(Rating::getScore)
+        .orElse(null);
+    return new RatingResponse(postId, my);
   }
 
   // 🗑️ 댓글 삭제
