@@ -7,7 +7,7 @@ import {
   deletePost as apiDeletePost,
   deleteComment as apiDeleteComment,
   getMe,
-  ratePost
+  ratePost,
 } from "../lib/boardApi";
 import { Post, Comment } from "../types/board";
 import CommentForm from "../components/CommentForm";
@@ -25,11 +25,13 @@ export default function PostDetailPage() {
 
   const isAuthor = useMemo(() => {
     if (!post || !meEmail) return false;
-    // 혹시 대소문자 섞임 방지
     return String(post.authorId).toLowerCase() === String(meEmail).toLowerCase();
   }, [post, meEmail]);
 
-  const isMyComment = (c: Comment) => !!meEmail && String(c.authorId).toLowerCase() === String(meEmail).toLowerCase();
+  // ✅ 내 댓글 여부 판별 함수(버튼 노출과 실제 삭제 모두에 사용)
+  const isMyComment = (c: Comment) =>
+    !!meEmail &&
+    String(c.authorId).toLowerCase() === String(meEmail).toLowerCase();
 
   const load = async () => {
     setLoading(true);
@@ -77,7 +79,8 @@ export default function PostDetailPage() {
   };
 
   const onDeleteComment = async (comment: Comment) => {
-    if (!isAuthor) {
+    // ✅ 댓글 삭제 권한은 "내 댓글" 기준으로 체크
+    if (!isMyComment(comment)) {
       alert("본인 댓글만 삭제할 수 있습니다.");
       return;
     }
@@ -115,14 +118,17 @@ export default function PostDetailPage() {
         글쓴이:
         <button
           className="underline underline-offset-2 hover:opacity-80"
-          onClick={() => post.authorId && nav(`/u/${encodeURIComponent(String(post.authorId))}`)}
+          onClick={() =>
+            post.authorId && nav(`/u/${encodeURIComponent(String(post.authorId))}`)
+          }
         >
           {post.authorNickname ?? post.authorId ?? "알 수 없음"}
         </button>
       </div>
 
       <div className="text-sm text-gray-600">
-        날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref} · 평점 ★ {(post.avgRating ?? 0) / 2} / 5 ({post.ratingsCount ?? 0}명)
+        날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref} · 평점 ★{" "}
+        {(post.avgRating ?? 0) / 2} / 5 ({post.ratingsCount ?? 0}명)
       </div>
       <div className="p-4 border rounded whitespace-pre-wrap">{post.content}</div>
 
@@ -155,8 +161,7 @@ export default function PostDetailPage() {
         {/* 댓글 목록 (삭제 버튼은 본인에게만) */}
         <ul className="space-y-2">
           {comments.map((c) => {
-            const myComment =
-              meEmail && String(c.authorId).toLowerCase() === meEmail.toLowerCase();
+            const myComment = isMyComment(c); // ✅ 통일된 판별 사용
             return (
               <li
                 key={c.id}
@@ -166,7 +171,9 @@ export default function PostDetailPage() {
                   <div className="text-xs text-gray-500">
                     <button
                       className="underline underline-offset-2 hover:opacity-80 mr-1"
-                      onClick={() => c.authorId && nav(`/u/${encodeURIComponent(String(c.authorId))}`)}
+                      onClick={() =>
+                        c.authorId && nav(`/u/${encodeURIComponent(String(c.authorId))}`)
+                      }
                     >
                       {c.authorNickname ?? c.authorId ?? "알 수 없음"}
                     </button>
@@ -174,6 +181,7 @@ export default function PostDetailPage() {
                   </div>
                   <div>{c.content}</div>
                 </div>
+
                 {myComment && (
                   <button
                     className="px-2 py-1 text-sm rounded bg-red-500 text-white shrink-0"
