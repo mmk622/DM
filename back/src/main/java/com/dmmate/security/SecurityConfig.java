@@ -26,7 +26,7 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    // ✅ CORS 설정 추가
+    // CORS 설정 추가
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
@@ -46,14 +46,14 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ 명시적으로 연결
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 명시적으로 연결
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // ✅ CORS Preflight 전부 허용
+                        // CORS Preflight 전부 허용
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // ✅ 공개 엔드포인트 (오타 수정: "/api/auth/complete-signup")
+                        // 공개 엔드포인트 (오타 수정: "/api/auth/complete-signup")
                         .requestMatchers(
                                 "/api/auth/request-otp",
                                 "/api/auth/verify-otp",
@@ -65,19 +65,19 @@ public class SecurityConfig {
                                 "/error")
                         .permitAll()
 
-                        // ✅ 공개 프로필 조회 허용
+                        // 공개 프로필 조회 허용
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*").permitAll()
                         // 기존 /api/users/me 는 authenticated 로 유지
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/me", "/api/users/me/")
                         .authenticated()
 
-                        // ✅ 게시판: GET은 공개, POST/DELETE는 인증
+                        // 게시판: GET은 공개, POST/DELETE는 인증
                         .requestMatchers(HttpMethod.GET, "/api/posts/*/rating").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").authenticated()
 
-                        // ✅ 내 정보: 인증 필요
+                        // 내 정보: 인증 필요
                         .requestMatchers(HttpMethod.GET, "/api/users/me", "/api/users/me/").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/me", "/api/users/me/").authenticated()
 

@@ -28,7 +28,7 @@ export default function PostDetailPage() {
     return String(post.authorId).toLowerCase() === String(meEmail).toLowerCase();
   }, [post, meEmail]);
 
-  // ✅ 내 댓글 여부 판별 함수(버튼 노출과 실제 삭제 모두에 사용)
+  // 내 댓글 여부 판별 함수(버튼 노출과 실제 삭제 모두에 사용)
   const isMyComment = (c: Comment) =>
     !!meEmail &&
     String(c.authorId).toLowerCase() === String(meEmail).toLowerCase();
@@ -79,7 +79,7 @@ export default function PostDetailPage() {
   };
 
   const onDeleteComment = async (comment: Comment) => {
-    // ✅ 댓글 삭제 권한은 "내 댓글" 기준으로 체크
+    // 댓글 삭제 권한은 "내 댓글" 기준으로 체크
     if (!isMyComment(comment)) {
       alert("본인 댓글만 삭제할 수 있습니다.");
       return;
@@ -161,7 +161,7 @@ export default function PostDetailPage() {
         {/* 댓글 목록 (삭제 버튼은 본인에게만) */}
         <ul className="space-y-2">
           {comments.map((c) => {
-            const myComment = isMyComment(c); // ✅ 통일된 판별 사용
+            const myComment = isMyComment(c); // 통일된 판별 사용
             return (
               <li
                 key={c.id}

@@ -28,7 +28,7 @@ export default function CompleteProfile() {
                 localStorage.removeItem("signupToken");
                 localStorage.removeItem("signupEmail");
                 localStorage.setItem("accessToken", data.accessToken);
-                nav("/profile"); // ✅ 프로필 화면으로 이동
+                nav("/profile"); // 프로필 화면으로 이동
             } else {
                 alert("회원가입 완료에 실패했습니다.");
             }

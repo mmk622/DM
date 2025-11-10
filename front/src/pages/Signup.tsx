@@ -153,7 +153,7 @@ export default function Signup() {
                         {email} 주소로 전송된 인증코드를 입력하세요.
                     </p>
 
-                    {/* 🔹 OTP 입력 + 타이머 */}
+                    {/* OTP 입력 + 타이머 */}
                     <label style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ flexGrow: 1 }}>
                             인증코드(OTP)

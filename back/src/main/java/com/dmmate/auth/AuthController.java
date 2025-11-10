@@ -24,7 +24,7 @@ public class AuthController {
     private final JwtTokenProvider jwt;
     private final StringRedisTemplate redis;
 
-    // ✅ 예전처럼: 이메일 기준 키 + 토큰 기준 키 둘 다 저장 (양방향)
+    // 예전처럼: 이메일 기준 키 + 토큰 기준 키 둘 다 저장 (양방향)
     private static final String VERIFIED_EMAIL_KEY = "otp:verified:"; // otp:verified:<email> = <signupToken>
     private static final String VERIFIED_TOKEN_KEY = "otp:signup:"; // otp:signup:<token> = <email>
     private static final Duration VERIFIED_TTL = Duration.ofMinutes(10);
