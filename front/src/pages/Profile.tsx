@@ -73,11 +73,13 @@ export default function Profile() {
       </button>
 
       <h1 className="text-2xl font-bold mb-2">내 프로필</h1>
-      <div><b>이메일:</b> {safeEmail}</div>
-      <div><b>이름:</b> {safeName}</div>
-      <div><b>닉네임:</b> {safeNick}</div>
-      <div><b>생성일:</b> {created}</div>
-      <div><b>수정일:</b> {updated}</div>
+      <div className="p-4 border rounded space-y-2">
+        <div><b>이메일:</b> {safeEmail}</div>
+        <div><b>이름:</b> {safeName}</div>
+        <div><b>닉네임:</b> {safeNick}</div>
+        <div><b>생성일:</b> {created}</div>
+        <div><b>수정일:</b> {updated}</div>
+      </div>
     </div>
   );
 }
