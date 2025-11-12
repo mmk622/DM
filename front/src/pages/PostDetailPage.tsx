@@ -23,6 +23,16 @@ export default function PostDetailPage() {
   const [meEmail, setMeEmail] = useState<string | null>(null);
   const [myRating, setMyRating] = useState<number | null>(null);
 
+  const goProfile = (targetEmail?: string | number | null) => {
+    if (!targetEmail) return;
+    const t = String(targetEmail);
+    if (meEmail && t.toLowerCase() === meEmail.toLowerCase()) {
+      nav("/profile");            // 본인일 때는 내 프로필로
+    } else {
+      nav(`/u/${encodeURIComponent(t)}`); // 타인 프로필
+    }
+  };
+
   const isAuthor = useMemo(() => {
     if (!post || !meEmail) return false;
     return String(post.authorId).toLowerCase() === String(meEmail).toLowerCase();
@@ -95,105 +105,102 @@ export default function PostDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-4">
-      <div className="flex justify-between items-start">
-        <h1 className="text-xl font-bold">{post.title}</h1>
-        <div className="flex gap-2">
-          <button className="px-3 py-2 rounded border" onClick={() => nav(-1)}>
-            목록
-          </button>
-
-          {/* 작성자만 삭제 버튼 노출 */}
-          {isAuthor && (
-            <button
-              className="px-3 py-2 rounded bg-red-600 text-white"
-              onClick={onDeletePost}
-            >
-              삭제
+      <div className="mx-auto" style={{ width: "640px", maxWidth: "100%" }}>
+        <div className="flex justify-between items-start">
+          <h1 className="text-xl font-bold">{post.title}</h1>
+          <div className="flex gap-2">
+            <button className="px-3 py-2 rounded border" onClick={() => nav(-1)}>
+              목록
             </button>
-          )}
-        </div>
-      </div>
 
-      <div className="text-sm text-gray-700">
-        글쓴이:
-        <button
-          className="underline underline-offset-2 hover:opacity-80"
-          onClick={() =>
-            post.authorId && nav(`/u/${encodeURIComponent(String(post.authorId))}`)
-          }
-        >
-          {post.authorNickname ?? post.authorId ?? "알 수 없음"}
-        </button>
-      </div>
-
-      <div className="text-sm text-gray-600">
-        날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref} · 평점 ★{" "}
-        {(post.avgRating ?? 0) / 2} / 5 ({post.ratingsCount ?? 0}명)
-      </div>
-      <div className="p-4 border rounded whitespace-pre-wrap">{post.content}</div>
-
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-600">내 평점</span>
-        <select
-          className="border rounded px-2 py-1"
-          value={myRating != null ? (myRating / 2).toString() : ""}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            if (!Number.isNaN(v)) onRate(v);
-          }}
-        >
-          <option value="">선택</option>
-          {Array.from({ length: 11 }).map((_, i) => {
-            const v = i * 0.5;
-            return (
-              <option key={v} value={v}>
-                {v} / 5
-              </option>
-            );
-          })}
-        </select>
-      </div>
-
-      <div className="space-y-2">
-        <h2 className="font-semibold">댓글</h2>
-        <CommentForm onSubmit={onAddComment} />
-
-        {/* 댓글 목록 (삭제 버튼은 본인에게만) */}
-        <ul className="space-y-2">
-          {comments.map((c) => {
-            const myComment = isMyComment(c); // 통일된 판별 사용
-            return (
-              <li
-                key={c.id}
-                className="p-3 border rounded flex justify-between items-start gap-2"
+            {/* 작성자만 삭제 버튼 노출 */}
+            {isAuthor && (
+              <button
+                className="px-3 py-2 rounded bg-red-600 text-white"
+                onClick={onDeletePost}
               >
-                <div className="whitespace-pre-wrap">
-                  <div className="text-xs text-gray-500">
-                    <button
-                      className="underline underline-offset-2 hover:opacity-80 mr-1"
-                      onClick={() =>
-                        c.authorId && nav(`/u/${encodeURIComponent(String(c.authorId))}`)
-                      }
-                    >
-                      {c.authorNickname ?? c.authorId ?? "알 수 없음"}
-                    </button>
-                    · {c.createdAt}
-                  </div>
-                  <div>{c.content}</div>
-                </div>
+                삭제
+              </button>
+            )}
+          </div>
+        </div>
 
-                {myComment && (
-                  <button
-                    className="px-2 py-1 text-sm rounded bg-red-500 text-white shrink-0"
-                    onClick={() => onDeleteComment(c)}
-                  >
-                    삭제
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="text-sm text-gray-700">
+          글쓴이:
+          <button
+            className="underline underline-offset-2 hover:opacity-80"
+            onClick={() => goProfile(post.authorId)}>
+            {post.authorNickname ?? post.authorId ?? "알 수 없음"}
+          </button>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          날짜 {post.mealDate} · 성별 {post.genderPref} · 인원 {post.partyPref} · 평점 ★{" "}
+          {(post.avgRating ?? 0) / 2} / 5 ({post.ratingsCount ?? 0}명)
+        </div>
+        <div className="p-4 border rounded whitespace-pre-wrap">{post.content}</div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">내 평점</span>
+          <select
+            className="border rounded px-2 py-1"
+            value={myRating != null ? (myRating / 2).toString() : ""}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              if (!Number.isNaN(v)) onRate(v);
+            }}
+          >
+            <option value="">선택</option>
+            {Array.from({ length: 11 }).map((_, i) => {
+              const v = i * 0.5;
+              return (
+                <option key={v} value={v}>
+                  {v} / 5
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-semibold">댓글</h2>
+          <CommentForm onSubmit={onAddComment} />
+
+          {/* 댓글 목록 (삭제 버튼은 본인에게만) */}
+          <ul className="space-y-2">
+            {comments.map((c) => {
+              const myComment = isMyComment(c); // 통일된 판별 사용
+              return (
+                <li
+                  key={c.id}
+                  className="p-3 border rounded flex justify-between items-start gap-2"
+                >
+                  <div className="whitespace-pre-wrap">
+                    <div className="text-xs text-gray-500">
+                      <button
+                        className="underline underline-offset-2 hover:opacity-80 mr-1"
+                        onClick={() => goProfile(c.authorId)}
+                      >
+                        {c.authorNickname ?? c.authorId ?? "알 수 없음"}
+                      </button>
+                      · {c.createdAt}
+                    </div>
+                    <div>{c.content}</div>
+                  </div>
+
+                  {myComment && (
+                    <button
+                      className="px-2 py-1 text-sm rounded bg-red-500 text-white shrink-0"
+                      onClick={() => onDeleteComment(c)}
+                    >
+                      삭제
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </div>
   );

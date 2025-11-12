@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
+import { getPublicUser } from "../lib/boardApi";
 
 type Me = {
   email: string;
@@ -14,6 +15,8 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [avgPostRating, setAvgPostRating] = useState<number>(0);
+  const [postCount, setPostCount] = useState<number>(0);
 
   useEffect(() => {
     (async () => {
@@ -21,6 +24,12 @@ export default function Profile() {
         setLoading(true);
         const { data } = await api.get("/api/users/me");
         setMe(data);
+
+        if (data?.email) {
+          const pub = await getPublicUser(data.email);
+          setAvgPostRating(pub?.avgPostRating ?? 0);
+          setPostCount(pub?.postCount ?? pub?.postsCount ?? 0);
+        }
       } catch (e: any) {
         if (e?.response?.status === 401) {
           setErr("로그인이 필요합니다. 인증 토큰이 없거나 만료되었습니다.");
@@ -60,25 +69,29 @@ export default function Profile() {
   const safeNick = me.nickname ?? "-";
   const created = me.createdAt ? new Date(me.createdAt).toLocaleString() : "-";
   const updated = me.updatedAt ? new Date(me.updatedAt).toLocaleString() : "-";
+  const avgStr = (avgPostRating ?? 0).toFixed(1);
 
   return (
     <div className="p-6 space-y-2 relative bg-white shadow-md rounded-lg">
-      <button
-        onClick={onDelete}
-        disabled={deleting}
-        className="fixed top-[80px] right-6 text-sm px-3 py-1 border border-red-500 text-red-600 rounded hover:bg-red-50 shadow-sm transition"
-        title="회원 탈퇴"
-      >
-        {deleting ? "탈퇴 중…" : "탈퇴"}
-      </button>
+      <div className="mx-auto" style={{ width: "640px", maxWidth: "100%" }}>
+        <button
+          onClick={onDelete}
+          disabled={deleting}
+          className="fixed top-[70px] right-6 text-sm px-3 py-1 border border-red-500 text-red-600 rounded hover:bg-red-50 shadow-sm transition"
+          title="회원 탈퇴"
+        >
+          {deleting ? "탈퇴 중…" : "탈퇴"}
+        </button>
 
-      <h1 className="text-2xl font-bold mb-2">내 프로필</h1>
-      <div className="p-4 border rounded space-y-2">
-        <div><b>이메일:</b> {safeEmail}</div>
-        <div><b>이름:</b> {safeName}</div>
-        <div><b>닉네임:</b> {safeNick}</div>
-        <div><b>생성일:</b> {created}</div>
-        <div><b>수정일:</b> {updated}</div>
+        <h1 className="text-2xl font-bold mb-2">내 프로필</h1>
+        <div className="p-4 border rounded space-y-2">
+          <div><b>이메일:</b> {safeEmail}</div>
+          <div><b>이름:</b> {safeName}</div>
+          <div><b>닉네임:</b> {safeNick}</div>
+          <div><b>평점: ★</b> X {avgStr / 2} (게시글 {postCount}개)</div>
+          <div><b>생성일:</b> {created}</div>
+          <div><b>수정일:</b> {updated}</div>
+        </div>
       </div>
     </div>
   );
